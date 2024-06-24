@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -13,20 +14,36 @@ var db *sql.DB
 
 func main() {
 	var err error
-	db, err = sql.Open("mysql", "root:MuLFjpjCHAKGLKBkOtXvIhWPbBIrdbAD@tcp(viaduct.proxy.rlwy.net:41263)/railway")
+
+	// Load database credentials from environment variables
+	dsn := os.Getenv("MYSQL_DSN")
+	if dsn == "" {
+		log.Fatal("MYSQL_DSN environment variable is required")
+	}
+
+	db, err = sql.Open("mysql", dsn)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to connect to the database: %v", err)
 	}
 	defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to ping the database: %v", err)
 	}
 
 	router := gin.Default()
 	router.POST("/submit-form", submitFormHandler)
-	router.Run(":8080")
+
+	// Use environment variable for port or default to 8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	if err := router.Run(":" + port); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
+	}
 }
 
 type FormInput struct {
@@ -44,12 +61,15 @@ func submitFormHandler(c *gin.Context) {
 
 	stmt, err := db.Prepare("INSERT INTO submissions (name, whatsapp, message) VALUES (?, ?, ?)")
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Failed to prepare statement: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to submit data"})
+		return
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(input.Name, input.Whatsapp, input.Message)
 	if err != nil {
+		log.Printf("Failed to execute statement: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to submit data"})
 		return
 	}
