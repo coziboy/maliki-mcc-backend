@@ -13,33 +13,33 @@ var db *sql.DB
 
 func main() {
 	var err error
-
-	// Load database credentials from environment variables
-	dsn := "root:MuLFjpjCHAKGLKBkOtXvIhWPbBIrdbAD@tcp(viaduct.proxy.rlwy.net:41263)/railway"
-	if dsn == "" {
-		log.Fatal("MYSQL_DSN environment variable is required")
-	}
-
-	db, err = sql.Open("mysql", dsn)
+	db, err = sql.Open("mysql", "root:MuLFjpjCHAKGLKBkOtXvIhWPbBIrdbAD@tcp(viaduct.proxy.rlwy.net:41263)/railway")
 	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v", err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatalf("Failed to ping the database: %v", err)
+		log.Fatal(err)
 	}
 
 	router := gin.Default()
+
+	// Enable CORS middleware
+	router.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if c.Request.Method == http.MethodOptions {
+			c.AbortWithStatus(http.StatusOK)
+			return
+		}
+		c.Next()
+	})
+
 	router.POST("/submit-form", submitFormHandler)
-
-	// Use environment variable for port or default to 8080
-	port := "8080"
-
-	if err := router.Run(":" + port); err != nil {
-		log.Fatalf("Failed to run server: %v", err)
-	}
+	router.Run(":8080")
 }
 
 type FormInput struct {
@@ -57,15 +57,12 @@ func submitFormHandler(c *gin.Context) {
 
 	stmt, err := db.Prepare("INSERT INTO submissions (name, whatsapp, message) VALUES (?, ?, ?)")
 	if err != nil {
-		log.Printf("Failed to prepare statement: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to submit data"})
-		return
+		log.Fatal(err)
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(input.Name, input.Whatsapp, input.Message)
 	if err != nil {
-		log.Printf("Failed to execute statement: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to submit data"})
 		return
 	}
