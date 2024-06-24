@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -36,10 +35,7 @@ func main() {
 	router.POST("/submit-form", submitFormHandler)
 
 	// Use environment variable for port or default to 8080
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	port := "8080"
 
 	if err := router.Run(":" + port); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
