@@ -1,11 +1,12 @@
 <?php
-$servername = "your_server";
-$username = "your_username";
-$password = "your_password";
-$dbname = "your_database";
+$servername = "viaduct.proxy.rlwy.net";
+$username = "root";
+$password = "MuLFjpjCHAKGLKBkOtXvIhWPbBIrdbAD";
+$dbname = "railway";
+$port = "41263"; // Add this line
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername, $username, $password, $dbname, $port); // Add $port parameter
 
 // Check connection
 if ($conn->connect_error) {
@@ -36,3 +37,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header('Allow: POST');
 }
 ?>
+
