@@ -30,7 +30,7 @@ func main() {
 
 	// CORS middleware configuration
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://your-frontend-domain.com"}, // Replace with your frontend domain
+		AllowOrigins:     []string{"https://maliki-mcc-production.up.railway.app"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
 		ExposeHeaders:    []string{"Content-Length"},
