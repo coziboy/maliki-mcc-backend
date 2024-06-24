@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
-
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -17,13 +15,8 @@ var db *sql.DB
 func main() {
 	var err error
 
-	err = godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
 	// Load database credentials from environment variables
-	dsn := os.Getenv("MYSQL_DSN")
+	dsn := "root:MuLFjpjCHAKGLKBkOtXvIhWPbBIrdbAD@tcp(viaduct.proxy.rlwy.net:41263)/railway"
 	if dsn == "" {
 		log.Fatal("MYSQL_DSN environment variable is required")
 	}
