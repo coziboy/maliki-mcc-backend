@@ -39,8 +39,20 @@ func main() {
 	}))
 
 	router.POST("/submit-form", submitFormHandler)
-	router.Run(":8080")
+	router.Run(envPortOr(8080))
 }
+
+// Returns PORT from environment if found, defaults to
+// value in `port` parameter otherwise. The returned port
+// is prefixed with a `:`, e.g. `":3000"`.
+func envPortOr(port string) string {
+	// If `PORT` variable in environment exists, return it
+	if envPort := os.Getenv("PORT"); envPort != "" {
+	  return ":" + envPort
+	}
+	// Otherwise, return the value of `port` variable from function argument
+	return ":" + port
+  }
 
 type FormInput struct {
 	Name     string `json:"name" binding:"required"`
