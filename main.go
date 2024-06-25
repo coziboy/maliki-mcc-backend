@@ -39,7 +39,7 @@ func main() {
 	}))
 
 	router.POST("/submit-form", submitFormHandler)
-	router.Run(envPortOr(8080))
+	router.Run(envPortOr('8080'))
 }
 
 // Returns PORT from environment if found, defaults to
